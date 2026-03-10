@@ -629,10 +629,56 @@ body {
   margin-top: 18px;
 }
 
-/* MOBILE FALLBACK */
+/* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
-  #desktop, #menubar, #dock, #boot { display: none !important; }
-  #mobile-fallback { display: flex !important; }
+  /* No custom cursor on touch */
+  #cursor { display: none !important; }
+
+  /* Desktop icons hidden — dock covers all apps */
+  #desktop-icons { display: none !important; }
+
+  /* Dock becomes a full-width bottom bar */
+  #dock {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    padding: 6px 8px !important;
+    padding-bottom: max(6px, env(safe-area-inset-bottom)) !important;
+    justify-content: space-around !important;
+    gap: 0 !important;
+  }
+  .dock-item {
+    width: 44px !important;
+    height: 44px !important;
+    margin: 0 !important;
+    transform: none !important;
+    border-radius: 10px !important;
+  }
+  .dock-item svg { width: 28px !important; height: 28px !important; }
+  .dock-item-tooltip { display: none !important; }
+  .dock-separator { display: none !important; }
+
+  /* Windows fill the space between menubar and dock */
+  .window {
+    left: 0 !important;
+    top: 28px !important;
+    width: 100vw !important;
+    height: calc(100vh - 28px - 68px) !important;
+    border-radius: 0 !important;
+    min-width: unset !important;
+    min-height: unset !important;
+  }
+  .window-resize-handle { display: none !important; }
+
+  /* Slim down menu bar on mobile */
+  .menubar-right .battery-icon,
+  .menubar-right .wifi-icon { display: none !important; }
 }
 
 /* STAT CARDS */
@@ -770,18 +816,6 @@ body {
   </div>
 </div>
 
-<div id="mobile-fallback" style="display:none;position:fixed;inset:0;z-index:9998;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:24px">
-  <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="var(--os-accent)" stroke-width="2">
-    <path d="M16 2 L28 7 L28 16 C28 22 22 27 16 30 C10 27 4 22 4 16 L4 7 Z"/>
-  </svg>
-  <div style="font-family:var(--font-display);font-weight:700;font-size:2rem;color:var(--os-text-1)">MANAN SHAH</div>
-  <div style="font-size:0.9rem;color:var(--os-accent)">Cybersecurity Engineer</div>
-  <a href="https://github.com/Mananshah237" target="_blank" rel="noopener" style="display:block;width:100%;max-width:280px;padding:14px 20px;background:var(--os-surface);border-radius:10px;color:var(--os-text-1);text-decoration:none;text-align:center;font-size:0.9rem">GitHub</a>
-  <a href="https://linkedin.com/in/Mananshah237" target="_blank" rel="noopener" style="display:block;width:100%;max-width:280px;padding:14px 20px;background:var(--os-surface);border-radius:10px;color:var(--os-text-1);text-decoration:none;text-align:center;font-size:0.9rem">LinkedIn</a>
-  <a href="mailto:mananshah4086@gmail.com" style="display:block;width:100%;max-width:280px;padding:14px 20px;background:var(--os-surface);border-radius:10px;color:var(--os-text-1);text-decoration:none;text-align:center;font-size:0.9rem">Email</a>
-  <a href="assets/resume.pdf" download style="display:block;width:100%;max-width:280px;padding:14px 20px;background:var(--os-surface);border-radius:10px;color:var(--os-text-1);text-decoration:none;text-align:center;font-size:0.9rem">Resume</a>
-  <div style="font-size:0.75rem;color:var(--os-text-3);margin-top:16px;text-align:center">For the full experience, visit on desktop.</div>
-</div>
 
 <script>
 // ─── 1. STATE ────────────────────────────────────────────────────
@@ -998,6 +1032,7 @@ const WM = {
     }
   },
   startDrag(e, id) {
+    if (window.innerWidth < 768) return;
     e.preventDefault();
     const el = OS.windows[id].el;
     OS.dragState = { id, offsetX: e.clientX - parseFloat(el.style.left), offsetY: e.clientY - parseFloat(el.style.top) };
@@ -1053,6 +1088,7 @@ const WM = {
     OS.dragState = null;
   },
   startResize(e, id) {
+    if (window.innerWidth < 768) return;
     e.preventDefault();
     const el = OS.windows[id].el;
     OS.resizeState = { id, startW: el.offsetWidth, startH: el.offsetHeight, startX: e.clientX, startY: e.clientY };
@@ -1119,6 +1155,7 @@ const Dock = {
     if (dot) dot.classList.toggle('visible', bool);
   },
   updateMagnification(mouseX) {
+    if (window.innerWidth < 768) return;
     document.querySelectorAll('.dock-item').forEach(item => {
       if (mouseX === null) { item.style.transform = 'scale(1)'; return; }
       const rect = item.getBoundingClientRect();
@@ -3302,11 +3339,6 @@ const Grain = {
   }
 };
 
-// Mobile check
-if (window.innerWidth < 768) {
-  document.getElementById('mobile-fallback').style.display = 'flex';
-  document.getElementById('boot').style.display = 'none';
-}
 
 // ─── 13. INIT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {

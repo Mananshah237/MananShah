@@ -9,14 +9,15 @@
 <meta property="og:image" content="assets/og-preview.png">
 <meta property="og:url" content="https://mananshah237.github.io">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Manan Shah — Cybersecurity Engineer. Container security, AppSec, cloud IR. UTA 2026.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://api.github.com https://formspree.io; frame-src 'none'; object-src 'none'; base-uri 'self'">
 <title>ManOS | Manan Shah — Cybersecurity Engineer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -54,11 +55,19 @@
 body {
   background: var(--os-bg);
   overflow: hidden;
-  cursor: none;
+  cursor: default;
   font-family: var(--font-body);
   color: var(--os-text-1);
   height: 100vh;
 }
+a, button, .dock-item,
+.desktop-icon, [data-app],
+[data-project], [data-view] { cursor: pointer; }
+.window-titlebar { cursor: grab; }
+.window-titlebar:active { cursor: grabbing; }
+.window-resize-handle { cursor: se-resize; }
+#network-canvas { cursor: crosshair; }
+#network-canvas.hovering-node { cursor: pointer; }
 
 #boot {
   position: fixed;
@@ -265,29 +274,7 @@ body {
 .notif-title { font-size: 0.8rem; font-weight: 600; color: var(--os-text-1); }
 .notif-body { font-size: 0.78rem; color: var(--os-text-2); margin-top: 2px; }
 
-#cursor {
-  position: fixed;
-  pointer-events: none;
-  z-index: 99999;
-  width: 10px;
-  height: 10px;
-  background: var(--os-text-1);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: transform 0.15s, background 0.15s, opacity 0.15s;
-}
-#cursor.hover {
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: 2px solid var(--os-accent);
-}
-#cursor.text {
-  width: 2px;
-  height: 18px;
-  border-radius: 1px;
-  background: var(--os-text-2);
-}
+
 
 .grain {
   position: fixed;
@@ -631,54 +618,11 @@ body {
 
 /* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
-  /* No custom cursor on touch */
-  #cursor { display: none !important; }
+  #menubar, #dock, #desktop-icons,
+  #network-overlay, .window,
+  #onboarding-overlay, #help-btn { display: none !important; }
 
-  /* Desktop icons hidden — dock covers all apps */
-  #desktop-icons { display: none !important; }
-
-  /* Dock becomes a full-width bottom bar */
-  #dock {
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    transform: none !important;
-    width: 100% !important;
-    border-radius: 0 !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-bottom: none !important;
-    padding: 6px 8px !important;
-    padding-bottom: max(6px, env(safe-area-inset-bottom)) !important;
-    justify-content: space-around !important;
-    gap: 0 !important;
-  }
-  .dock-item {
-    width: 44px !important;
-    height: 44px !important;
-    margin: 0 !important;
-    transform: none !important;
-    border-radius: 10px !important;
-  }
-  .dock-item svg { width: 28px !important; height: 28px !important; }
-  .dock-item-tooltip { display: none !important; }
-  .dock-separator { display: none !important; }
-
-  /* Windows fill the space between menubar and dock */
-  .window {
-    left: 0 !important;
-    top: 28px !important;
-    width: 100vw !important;
-    height: calc(100vh - 28px - 68px) !important;
-    border-radius: 0 !important;
-    min-width: unset !important;
-    min-height: unset !important;
-  }
-  .window-resize-handle { display: none !important; }
-
-  /* Slim down menu bar on mobile */
-  .menubar-right .battery-icon,
-  .menubar-right .wifi-icon { display: none !important; }
+  #mobile-fallback { display: flex !important; }
 }
 
 /* STAT CARDS */
@@ -773,7 +717,7 @@ body {
       <path d="M16 2 L28 7 L28 16 C28 22 22 27 16 30 C10 27 4 22 4 16 L4 7 Z"/>
     </svg>
     <span style="font-size:0.78rem;font-weight:700;color:var(--os-text-1)">ManOS</span>
-    <span id="menubar-appname" style="color:var(--os-text-2)"></span>
+    <span id="menubar-appname" style="color:var(--os-text-2);font-style:italic;color:var(--os-text-3)">Click an icon to get started</span>
   </div>
   <div id="menubar-right">
     <span id="menubar-clock"></span>
@@ -783,7 +727,36 @@ body {
 <div id="dock"></div>
 <div id="notifications"></div>
 <div id="context-menu"></div>
-<div id="cursor"></div>
+
+<!-- Onboarding overlay -->
+<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(5,13,26,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+  <div style="background:var(--os-glass);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:40px;max-width:420px;width:calc(100% - 48px);text-align:center">
+    <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="var(--os-accent)" stroke-width="2" style="margin-bottom:16px"><path d="M16 2 L28 7 L28 16 C28 22 22 27 16 30 C10 27 4 22 4 16 L4 7 Z"/></svg>
+    <h2 style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--os-text-1);margin-bottom:10px">Welcome to AEGIS-OS</h2>
+    <p style="font-size:0.9rem;color:var(--os-text-2);margin-bottom:16px">Manan's portfolio — built as an interactive desktop.</p>
+    <p style="font-size:0.85rem;color:var(--os-text-3);margin-bottom:6px">Click any icon to open an app.</p>
+    <p style="font-size:0.85rem;color:var(--os-text-3);margin-bottom:28px">Start with <span style="color:var(--os-accent)">About Me</span> to learn who Manan is.</p>
+    <button id="onboarding-dismiss" style="background:var(--os-accent);border:none;border-radius:10px;color:#fff;font-family:var(--font-body);font-size:0.9rem;font-weight:600;padding:12px 28px;cursor:pointer;width:100%">Start exploring →</button>
+  </div>
+</div>
+
+<!-- Mobile fallback -->
+<div id="mobile-fallback" style="display:none;position:fixed;inset:0;z-index:9999;background:var(--os-bg);flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:0;text-align:center">
+  <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="var(--os-accent)" stroke-width="2" style="margin-bottom:20px"><path d="M16 2 L28 7 L28 16 C28 22 22 27 16 30 C10 27 4 22 4 16 L4 7 Z"/></svg>
+  <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--os-text-1);margin-bottom:6px">MANAN SHAH</h1>
+  <p style="font-family:var(--font-body);font-size:0.88rem;color:var(--os-accent);letter-spacing:0.15em;margin-bottom:6px">Cybersecurity Engineer</p>
+  <p style="font-family:var(--font-body);font-size:0.8rem;color:var(--os-text-3);margin-bottom:24px">UTA · May 2026 · Open to full-time roles</p>
+  <div style="width:100%;height:1px;background:var(--os-border);margin-bottom:20px"></div>
+  <p style="font-size:0.88rem;color:var(--os-text-2);line-height:1.8;margin-bottom:24px">I build tools that find what attackers look for before they do. Container security researcher at UTA. AppSec + cloud security internship background. Graduating May 2026.</p>
+  <div style="width:100%;height:1px;background:var(--os-border);margin-bottom:20px"></div>
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px;margin-bottom:24px">
+    <a href="https://github.com/Mananshah237" target="_blank" rel="noopener" style="display:block;padding:12px 20px;border:1px solid var(--os-border-2);border-radius:10px;color:var(--os-text-1);text-decoration:none;font-size:0.88rem;background:var(--os-surface)">GitHub — github.com/Mananshah237</a>
+    <a href="https://linkedin.com/in/Mananshah237" target="_blank" rel="noopener" style="display:block;padding:12px 20px;border:1px solid var(--os-border-2);border-radius:10px;color:var(--os-text-1);text-decoration:none;font-size:0.88rem;background:var(--os-surface)">LinkedIn — linkedin.com/in/Mananshah237</a>
+    <a href="mailto:mananshah4086@gmail.com" style="display:block;padding:12px 20px;border:1px solid var(--os-border-2);border-radius:10px;color:var(--os-text-1);text-decoration:none;font-size:0.88rem;background:var(--os-surface)">Email — mananshah4086@gmail.com</a>
+    <a href="assets/resume.pdf" download style="display:block;padding:12px 20px;border-radius:10px;color:#fff;text-decoration:none;font-size:0.88rem;background:var(--os-accent);font-weight:600">Download Resume (PDF)</a>
+  </div>
+  <p style="font-size:0.72rem;color:var(--os-text-3);font-style:italic">For the full interactive experience, visit on desktop.</p>
+</div>
 
 <!-- Command Palette -->
 <div id="command-palette-overlay" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(5,13,26,0.7);backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding-top:120px">
@@ -818,7 +791,6 @@ body {
 
 
 <script>
-// ─── 1. STATE ────────────────────────────────────────────────────
 const OS = {
   windows: {},
   zIndex: 100,
@@ -830,7 +802,6 @@ const OS = {
   historyIdx: -1,
 };
 
-// ─── ICONS ───────────────────────────────────────────────────────
 const ICONS = {
   finder: `<svg viewBox="0 0 48 48" fill="none" stroke="var(--os-accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12C8 10 10 8 12 8H36C38 8 40 10 40 12V36C40 38 38 40 36 40H12C10 40 8 38 8 36V12Z"/><path d="M8 18H40"/><path d="M18 18V40"/></svg>`,
   terminal: `<svg viewBox="0 0 48 48" fill="none" stroke="var(--os-green)" stroke-width="2.5" stroke-linecap="round"><path d="M8 32L20 24L8 16"/><path d="M24 32H40"/><rect x="6" y="8" width="36" height="32" rx="4" stroke-width="2"/></svg>`,
@@ -844,12 +815,12 @@ const ICONS = {
 };
 
 const DOCK_APPS = [
-  { id: 'finder',     label: 'Finder' },
+  { id: 'finder',     label: 'About Me' },
   { id: 'terminal',   label: 'Terminal' },
-  { id: 'projects',   label: 'Case Files' },
-  { id: 'research',   label: 'Intel' },
-  { id: 'experience', label: 'Field Record' },
-  { id: 'skills',     label: 'Capabilities' },
+  { id: 'projects',   label: 'Projects' },
+  { id: 'research',   label: 'Research' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'skills',     label: 'Skills' },
   { id: 'contact',    label: 'Contact' },
   { id: 'network',    label: 'Network (N)' },
   null,
@@ -857,18 +828,17 @@ const DOCK_APPS = [
 ];
 
 const DESKTOP_ICONS = [
-  { id: 'finder',     label: 'Finder' },
+  { id: 'finder',     label: 'About Me' },
   { id: 'terminal',   label: 'Terminal' },
-  { id: 'projects',   label: 'Case Files' },
-  { id: 'research',   label: 'Intel' },
-  { id: 'experience', label: 'Field Record' },
-  { id: 'skills',     label: 'Capabilities' },
+  { id: 'projects',   label: 'Projects' },
+  { id: 'research',   label: 'Research' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'skills',     label: 'Skills' },
   { id: 'contact',    label: 'Contact' },
   { id: 'network',    label: 'Network' },
   { id: 'resume',     label: 'Resume.pdf' },
 ];
 
-// ─── 2. BOOT ────────────────────────────────────────────────────
 const Boot = {
   skipEnabled: false,
   steps: [
@@ -886,9 +856,14 @@ const Boot = {
       document.getElementById('boot').style.display = 'none';
       document.getElementById('desktop').style.opacity = '1';
       OS.bootComplete = true;
+      Wallpaper.init();
       setTimeout(() => {
-        Desktop.openApp('finder');
-        Notify.show({ title: 'ManOS', body: 'Welcome back, Manan.', duration: 4000 });
+        if (!localStorage.getItem('aegis-onboarded')) {
+          Boot.showOnboarding();
+        } else {
+          openOrFocus('finder');
+          Notify.show({ title: 'AEGIS-OS', body: 'Welcome back, Manan.', duration: 4000 });
+        }
       }, 300);
       return;
     }
@@ -910,12 +885,28 @@ const Boot = {
     gsap.to(desktop, { opacity: 1, duration: 0.4, delay: 0.1 });
     localStorage.setItem('aegis-booted', '1');
     OS.bootComplete = true;
-    setTimeout(() => Desktop.openApp('finder'), 600);
-    setTimeout(() => Notify.show({ title: 'ManOS', body: 'Welcome, Manan. All systems operational.', duration: 5000 }), 1200);
+    Wallpaper.init();
+    setTimeout(() => {
+      if (!localStorage.getItem('aegis-onboarded')) {
+        Boot.showOnboarding();
+      } else {
+        openOrFocus('finder');
+        Notify.show({ title: 'AEGIS-OS', body: 'Welcome, Manan. All systems operational.', duration: 5000 });
+      }
+    }, 600);
+  },
+  showOnboarding() {
+    const overlay = document.getElementById('onboarding-overlay');
+    overlay.style.display = 'flex';
+    gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.4 });
+    document.getElementById('onboarding-dismiss').addEventListener('click', () => {
+      gsap.to(overlay, { opacity: 0, duration: 0.3, onComplete: () => { overlay.style.display = 'none'; } });
+      localStorage.setItem('aegis-onboarded', '1');
+      setTimeout(() => openOrFocus('finder'), 400);
+    });
   }
 };
 
-// ─── 3. WINDOW MANAGER ──────────────────────────────────────────
 const WM = {
   cascadeX: 80, cascadeY: 60, cascadeCount: 0,
   cascade() {
@@ -955,9 +946,9 @@ const WM = {
       prevW: w, prevH: h, prevX: pos.x, prevY: pos.y,
       maximized: false, opts
     };
-    el.querySelector('.wc-close').addEventListener('click', () => WM.close(id));
-    el.querySelector('.wc-minimize').addEventListener('click', () => WM.minimize(id));
-    el.querySelector('.wc-maximize').addEventListener('click', () => WM.toggleMaximize(id));
+    el.querySelector('.wc-close').addEventListener('click', (e) => { e.stopPropagation(); if (e.target.classList.contains('wc-close')) WM.close(id); });
+    el.querySelector('.wc-minimize').addEventListener('click', (e) => { e.stopPropagation(); if (e.target.classList.contains('wc-minimize')) WM.minimize(id); });
+    el.querySelector('.wc-maximize').addEventListener('click', (e) => { e.stopPropagation(); if (e.target.classList.contains('wc-maximize')) WM.toggleMaximize(id); });
     el.querySelector('.window-titlebar').addEventListener('mousedown', (e) => {
       if (e.target.closest('.window-controls')) return;
       WM.startDrag(e, id);
@@ -973,7 +964,10 @@ const WM = {
       el.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
       el.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
     });
-    gsap.from(el, { scale: 0.88, opacity: 0, duration: 0.28, ease: 'cubic-bezier(0.34,1.56,0.64,1)', transformOrigin: 'center bottom' });
+    gsap.from(el, { scale: 0.88, opacity: 0, duration: 0.28, ease: 'cubic-bezier(0.34,1.56,0.64,1)', transformOrigin: 'center bottom', onComplete: () => {
+      if (id === 'skills') AppSkills.initChart();
+      if (id === 'experience') AppExperience.animateTimeline();
+    } });
     this.focus(id);
     Dock.setActive(id, true);
     if (opts.onOpen) setTimeout(opts.onOpen, 80);
@@ -1034,17 +1028,22 @@ const WM = {
   startDrag(e, id) {
     if (window.innerWidth < 768) return;
     e.preventDefault();
-    const el = OS.windows[id].el;
-    OS.dragState = { id, offsetX: e.clientX - parseFloat(el.style.left), offsetY: e.clientY - parseFloat(el.style.top) };
+    const win = document.getElementById('win-' + id);
+    const rect = win.getBoundingClientRect();
+    OS.dragState = { id, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
     this.focus(id);
   },
   onDrag(e) {
     if (!OS.dragState) return;
     const { id, offsetX, offsetY } = OS.dragState;
     if (!OS.windows[id]) return;
-    const el = OS.windows[id].el;
-    el.style.left = (e.clientX - offsetX) + 'px';
-    el.style.top = Math.max(28, e.clientY - offsetY) + 'px';
+    const win = document.getElementById('win-' + id);
+    let x = e.clientX - offsetX;
+    let y = e.clientY - offsetY;
+    y = Math.max(28, y);
+    x = Math.max(-win.offsetWidth + 60, Math.min(window.innerWidth - 60, x));
+    win.style.left = x + 'px';
+    win.style.top  = y + 'px';
     // Edge snap detection — show snap preview ghost
     const snapEl = document.getElementById('snap-preview');
     if (!snapEl) return;
@@ -1107,10 +1106,22 @@ const WM = {
   stopResize() { OS.resizeState = null; }
 };
 
-document.addEventListener('mousemove', (e) => { WM.onDrag(e); WM.onResize(e); Cursor.update(e); });
+document.addEventListener('mousemove', (e) => { WM.onDrag(e); WM.onResize(e); });
 document.addEventListener('mouseup', () => { WM.stopDrag(); WM.stopResize(); });
 
-// ─── 4. DOCK ────────────────────────────────────────────────────
+document.addEventListener('click', e => {
+  const sidebarItem = e.target.closest('[data-view]');
+  if (sidebarItem && sidebarItem.dataset.app === 'finder') {
+    document.querySelectorAll('.finder-sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarItem.classList.add('active');
+    AppFinder.showView(sidebarItem.dataset.view);
+  }
+  const projItem = e.target.closest('[data-pid]');
+  if (projItem) {
+    AppProjects.selectProject(projItem.dataset.pid);
+  }
+});
+
 const Dock = {
   init() {
     const dock = document.getElementById('dock');
@@ -1133,12 +1144,7 @@ const Dock = {
       `;
       item.addEventListener('click', () => {
         this.bounce(app.id);
-        if (OS.windows[app.id]) {
-          if (OS.windows[app.id].minimized) WM.restore(app.id);
-          else WM.focus(app.id);
-        } else {
-          Desktop.openApp(app.id);
-        }
+        openOrFocus(app.id);
       });
       dock.appendChild(item);
     });
@@ -1170,7 +1176,17 @@ const Dock = {
   }
 };
 
-// ─── 5. DESKTOP ─────────────────────────────────────────────────
+function openOrFocus(id) {
+  if (id === 'resume') { window.open('assets/resume.pdf', '_blank'); return; }
+  if (id === 'network') { if (NetworkMode.active) NetworkMode.exit(); else NetworkMode.enter(); return; }
+  if (OS.windows[id]) {
+    WM.focus(id);
+    if (OS.windows[id].minimized) WM.restore(id);
+  } else {
+    Desktop.openApp(id);
+  }
+}
+
 const Desktop = {
   selected: null,
   init() {
@@ -1180,8 +1196,7 @@ const Desktop = {
       icon.className = 'desktop-icon';
       icon.id = 'dicon-' + app.id;
       icon.innerHTML = `${ICONS[app.id] || ''}<span class="desktop-icon-label">${app.label}</span>`;
-      icon.addEventListener('click', (e) => { e.stopPropagation(); this.selectIcon(app.id); });
-      icon.addEventListener('dblclick', (e) => { e.stopPropagation(); this.openApp(app.id); });
+      icon.addEventListener('click', (e) => { e.stopPropagation(); this.openApp(app.id); });
       container.appendChild(icon);
     });
     document.getElementById('desktop').addEventListener('click', () => this.deselectAll());
@@ -1215,7 +1230,6 @@ const Desktop = {
   }
 };
 
-// ─── 6. MENUBAR ─────────────────────────────────────────────────
 const MenuBar = {
   init() {
     this.tick();
@@ -1235,39 +1249,33 @@ const MenuBar = {
   },
   setAppName(name) {
     const el = document.getElementById('menubar-appname');
-    if (el) el.textContent = name;
+    if (el) {
+      el.textContent = name || 'Click an icon to get started';
+      el.style.fontStyle = name ? 'normal' : 'italic';
+      el.style.color = name ? 'var(--os-text-2)' : 'var(--os-text-3)';
+    }
   }
 };
 
-// ─── 7. APPS ────────────────────────────────────────────────────
-
-// ── AppFinder ──────────────────────────────────────────────────
 const AppFinder = {
   currentView: 'profile',
   render() {
     const content = `<div class="finder-wrap">
       <div class="finder-sidebar">
-        <div class="finder-sidebar-item active" data-view="profile">Profile</div>
-        <div class="finder-sidebar-item" data-view="stats">Quick Stats</div>
-        <div class="finder-sidebar-item" data-view="status">Status</div>
-        <div class="finder-sidebar-item" data-view="activity">Activity</div>
+        <div class="finder-sidebar-item active" data-view="profile" data-app="finder">Profile</div>
+        <div class="finder-sidebar-item" data-view="stats" data-app="finder">Quick Stats</div>
+        <div class="finder-sidebar-item" data-view="status" data-app="finder">Status</div>
+        <div class="finder-sidebar-item" data-view="activity" data-app="finder">Activity</div>
       </div>
       <div class="finder-main" id="finder-main-panel"></div>
     </div>`;
     WM.create('finder', {
-      title: 'Finder', width: 860, height: 540, minW: 600, minH: 400,
+      title: 'About Me', width: 860, height: 540, minW: 600, minH: 400,
       content,
       onOpen: () => this.onOpen()
     });
   },
   onOpen() {
-    document.querySelectorAll('.finder-sidebar-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.finder-sidebar-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        this.showView(item.dataset.view);
-      });
-    });
     this.showView('profile');
   },
   showView(view) {
@@ -1477,7 +1485,6 @@ const AppFinder = {
   }
 };
 
-// ── AppTerminal ─────────────────────────────────────────────────
 const AppTerminal = {
   render() {
     const content = `
@@ -1584,10 +1591,11 @@ const AppTerminal = {
   },
   handleInput(rawCmd) {
     const cmd = rawCmd.trim();
-    const parts = cmd.split(/\s+/);
-    const base = parts[0].toLowerCase();
+    const parts = cmd.trim().toLowerCase().split(/\s+/);
+    const base = parts[0];
+    const args = parts.slice(1).join(' ');
 
-    if (cmd === 'help') {
+    if (base === 'help') {
       this.addLine('┌─ Available Commands ──────────────────────────────────┐', 't-code');
       const cmds = [
         ['whoami',          'About Manan Shah'],
@@ -1617,7 +1625,7 @@ const AppTerminal = {
       });
       this.addLine('└────────────────────────────────────────────────────────┘', 't-code');
 
-    } else if (base === 'whoami') {
+    } else if (base === 'whoami' && args === '') {
       this.typeOutput([
         'Name:         Manan Shah',
         'Role:         Cybersecurity Engineer',
@@ -1627,7 +1635,7 @@ const AppTerminal = {
         'Available:    May 2026 — full-time roles',
       ], 't-out');
 
-    } else if (cmd === 'ls projects/' || cmd === 'ls projects') {
+    } else if (base === 'ls' && (args === 'projects/' || args === 'projects')) {
       this.addLine('drwxr-xr-x  phishnet', 't-code');
       this.addLine('drwxr-xr-x  aegisscan', 't-code');
       this.addLine('drwxr-xr-x  cloud-ir-lab', 't-code');
@@ -1635,49 +1643,49 @@ const AppTerminal = {
       this.addLine('drwxr-xr-x  tcn-investments', 't-code');
       this.addLine('drwxr-xr-x  compass-cms', 't-code');
 
-    } else if (cmd === 'cat projects/phishnet') {
+    } else if (base === 'cat' && args === 'projects/phishnet') {
       this.addLine('── PhishNet ──────────────────────────────────────────', 't-success');
       this.addLine('AI-powered phishing detection and safe email rewriting engine.', 't-out');
       this.addLine('Stack: Python · FastAPI · React · HuggingFace · Docker', 't-code');
       this.addLine('Result: 91% precision on test set. Analyst triage time reduced.', 't-out');
       this.addLine('Repo: github.com/Mananshah237', 't-dim');
 
-    } else if (cmd === 'cat projects/aegisscan') {
+    } else if (base === 'cat' && args === 'projects/aegisscan') {
       this.addLine('── AegisScan ─────────────────────────────────────────', 't-success');
       this.addLine('Container image vulnerability scanner and automated debloating platform.', 't-out');
       this.addLine('Stack: Python · Docker · Trivy · Grype · Snyk · Bash', 't-code');
       this.addLine('Result: Reduces attack surface 40-60%. Unified risk-scored reports.', 't-out');
       this.addLine('Repo: github.com/Mananshah237', 't-dim');
 
-    } else if (cmd === 'cat projects/cloud-ir-lab') {
+    } else if (base === 'cat' && args === 'projects/cloud-ir-lab') {
       this.addLine('── Cloud-IR-Lab ──────────────────────────────────────', 't-success');
       this.addLine('Automated cloud incident response framework for AWS environments.', 't-out');
       this.addLine('Stack: AWS Lambda · GuardDuty · Step Functions · Terraform · Python', 't-code');
       this.addLine('Result: MTTC drops from ~40 min to <90 seconds.', 't-out');
       this.addLine('Repo: github.com/Mananshah237', 't-dim');
 
-    } else if (cmd === 'cat projects/log-aggregator') {
+    } else if (base === 'cat' && args === 'projects/log-aggregator') {
       this.addLine('── Log-Aggregator / Rate Limiter ─────────────────────', 't-success');
       this.addLine('Distributed security log pipeline with adaptive rate limiting.', 't-out');
       this.addLine('Stack: Go · Apache Kafka · Redis · Prometheus · Grafana · PostgreSQL', 't-code');
       this.addLine('Result: 50K events/sec sustained throughput on commodity hardware.', 't-out');
       this.addLine('Repo: github.com/Mananshah237/Log-Aggregator', 't-dim');
 
-    } else if (cmd === 'cat projects/tcn-investments') {
+    } else if (base === 'cat' && args === 'projects/tcn-investments') {
       this.addLine('── TCN Investments ───────────────────────────────────', 't-success');
       this.addLine('Production real estate investment platform built during TCN internship.', 't-out');
       this.addLine('Stack: Next.js 14 · TypeScript · Tailwind CSS · Shadcn UI · Vercel', 't-code');
       this.addLine('Result: Deployed production site with animated UI, SEO-optimized, zero-config CI/CD.', 't-out');
       this.addLine('Repo: github.com/Mananshah237/TCN_investments', 't-dim');
 
-    } else if (cmd === 'cat projects/compass-cms') {
+    } else if (base === 'cat' && args === 'projects/compass-cms') {
       this.addLine('── Compass Remodeling CMS ────────────────────────────', 't-success');
       this.addLine('Full-featured TypeScript CMS for a remodeling business.', 't-out');
       this.addLine('Stack: TypeScript · Next.js · Tailwind CSS · REST APIs', 't-code');
       this.addLine('Result: Production CMS with security-first architecture, prevents XSS/injection by design.', 't-out');
       this.addLine('Repo: github.com/Mananshah237/Compass-remodeling_CMS', 't-dim');
 
-    } else if (cmd === 'cat skills') {
+    } else if (base === 'cat' && args === 'skills') {
       this.addLine('── Skills ────────────────────────────────────────────', 't-success');
       this.addLine('Languages:      Python, Go, JavaScript, Bash, SQL, C', 't-out');
       this.addLine('Security:       Burp Suite, Nmap, Wireshark, Metasploit, Semgrep, ZAP', 't-out');
@@ -1685,14 +1693,14 @@ const AppTerminal = {
       this.addLine('Cloud:          AWS EC2/Lambda, GuardDuty, CloudWatch, IAM, Terraform', 't-out');
       this.addLine('CTF Domains:    Web Exploitation, Pwn/Binary, Crypto, Forensics, RevEng', 't-out');
 
-    } else if (cmd === 'cat research') {
+    } else if (base === 'cat' && args === 'research') {
       this.addLine('── Research ──────────────────────────────────────────', 't-success');
       this.addLine('[ACTIVE] Container & Cloud Security Research', 't-out');
       this.addLine('         UTA Security Lab · 2024–Present · Target: SCRF 2025', 't-dim');
       this.addLine('[DONE]   PhishNet: AI-Driven Phishing Email Rewriter', 't-out');
       this.addLine('         UTA CSE 4316/4317 Senior Capstone · 2025', 't-dim');
 
-    } else if (cmd === 'ping github') {
+    } else if (base === 'ping' && args === 'github') {
       this.addLine('PING github.com (140.82.121.4) 56 bytes of data.', 't-out');
       const doPing = (seq) => new Promise((resolve) => {
         const t0 = performance.now();
@@ -1718,7 +1726,7 @@ const AppTerminal = {
       };
       runPing();
 
-    } else if (cmd === 'curl contact') {
+    } else if (base === 'curl' && args === 'contact') {
       this.addLine(JSON.stringify({
         email: 'mananshah4086@gmail.com',
         github: 'github.com/Mananshah237',
@@ -1727,7 +1735,7 @@ const AppTerminal = {
         available: 'May 2026'
       }, null, 2), 't-code');
 
-    } else if (cmd === 'sudo hire manan') {
+    } else if (base === 'sudo' && args === 'hire manan') {
       this.addLine('[sudo] password for recruiter: ', 't-out');
       setTimeout(() => {
         this.addLine('●●●●●●●●', 't-dim');
@@ -1780,7 +1788,7 @@ const AppTerminal = {
       hist.forEach((c, i) => this.addLine(`  ${i + 1}  ${c}`, 't-dim'));
       if (!hist.length) this.addLine('No history.', 't-dim');
 
-    } else if (cmd === 'uname -a') {
+    } else if (base === 'uname' && args === '-a') {
       this.addLine('ManOS 2.0.26 manan-portfolio x86_64 GNU/Linux', 't-code');
 
     } else if (base === 'uptime') {
@@ -1798,12 +1806,11 @@ const AppTerminal = {
       Notify.show({ title: 'Terminal', body: 'Cannot close the only session. Nice try.', duration: 3000 });
 
     } else {
-      this.addLine(`bash: ${parts[0]}: command not found. Try "help".`, 't-error');
+      this.addLine(`bash: ${base}: command not found. Try "help".`, 't-error');
     }
   }
 };
 
-// ── AppProjects ─────────────────────────────────────────────────
 const AppProjects = {
   projects: [
     {
@@ -1874,7 +1881,7 @@ const AppProjects = {
       <div class="projects-detail" id="projects-detail-panel"></div>
     </div>`;
     WM.create('projects', {
-      title: 'Case Files', width: 900, height: 600, minW: 600, minH: 400,
+      title: 'Projects', width: 900, height: 600, minW: 600, minH: 400,
       content,
       onOpen: () => this.onOpen()
     });
@@ -1914,7 +1921,6 @@ const AppProjects = {
   }
 };
 
-// ── AppResearch ─────────────────────────────────────────────────
 const AppResearch = {
   render() {
     const content = `<div class="research-wrap" style="background-image:radial-gradient(circle,rgba(26,111,255,0.07) 1px,transparent 1px);background-size:24px 24px">
@@ -1953,7 +1959,7 @@ const AppResearch = {
       </blockquote>
     </div>`;
     WM.create('research', {
-      title: 'Intel', width: 780, height: 520, minW: 500, minH: 360,
+      title: 'Research', width: 780, height: 520, minW: 500, minH: 360,
       content,
       onOpen: () => {
         setTimeout(() => {
@@ -1965,7 +1971,6 @@ const AppResearch = {
   }
 };
 
-// ── AppExperience ───────────────────────────────────────────────
 const AppExperience = {
   entries: [
     {
@@ -2021,7 +2026,7 @@ const AppExperience = {
       ${nodePositions.map((y, i) => `<circle cx="10" cy="${y}" r="5" fill="var(--os-accent)" id="exp-node-${i}" opacity="0" style="filter:drop-shadow(0 0 6px var(--os-accent))"/>`).join('')}
     </svg>`;
     const content = `<div class="experience-wrap" style="position:relative;padding:32px 32px 32px 52px;max-width:640px;margin:auto">
-      <h1 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--os-text-1);margin-bottom:32px">Field Record</h1>
+      <h1 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--os-text-1);margin-bottom:32px">Experience</h1>
       <div id="exp-entries-container" style="position:relative">
         ${svgLine}
         ${this.entries.map((e, i) => `
@@ -2036,9 +2041,8 @@ const AppExperience = {
       </div>
     </div>`;
     WM.create('experience', {
-      title: 'Field Record', width: 720, height: 560, minW: 500, minH: 400,
-      content,
-      onOpen: () => this.animateTimeline()
+      title: 'Experience', width: 720, height: 560, minW: 500, minH: 400,
+      content
     });
   },
   animateTimeline() {
@@ -2060,7 +2064,6 @@ const AppExperience = {
   }
 };
 
-// ── AppSkills ───────────────────────────────────────────────────
 const AppSkills = {
   chartInstance: null,
   render() {
@@ -2077,14 +2080,13 @@ const AppSkills = {
       </div>`).join('');
     const content = `<div class="skills-wrap">
       <div class="skills-chart-panel">
-        <canvas id="skills-radar" style="max-width:240px;max-height:240px"></canvas>
+        <canvas id="skills-radar" width="260" height="260" style="max-width:260px;max-height:260px"></canvas>
       </div>
       <div class="skills-tags-panel">${tagsHTML}</div>
     </div>`;
     WM.create('skills', {
-      title: 'Capabilities', width: 840, height: 580, minW: 600, minH: 400,
-      content,
-      onOpen: () => this.initChart()
+      title: 'Skills', width: 840, height: 580, minW: 600, minH: 400,
+      content
     });
   },
   initChart() {
@@ -2122,7 +2124,6 @@ const AppSkills = {
   }
 };
 
-// ── AppContact ──────────────────────────────────────────────────
 const AppContact = {
   render() {
     const rows = [
@@ -2223,7 +2224,6 @@ const AppContact = {
   }
 };
 
-// ─── 8. WALLPAPER ───────────────────────────────────────────────
 const Wallpaper = {
   renderer: null, scene: null, camera: null, raf: null,
   mouseX: 0, mouseY: 0, camX: 0, camY: 0,
@@ -2329,7 +2329,6 @@ const Wallpaper = {
   }
 };
 
-// ─── 8b. NETWORK MODE ───────────────────────────────────────────
 const NODE_DEFS = [
   { id:'finder',     label:'MANAN SHAH',      position:{x:0,y:0,z:0},         geometry:'sphere',      color:0x1A6FFF, emissive:0x0A3080, scale:2.8, pulseSpeed:0.8,  connectedTo:['projects','research','experience','skills','contact','terminal'] },
   { id:'projects',   label:'CASE FILES',      position:{x:28,y:5,z:-10},      geometry:'icosahedron', color:0x00C2FF, emissive:0x005A80, scale:2.0, pulseSpeed:1.2,  connectedTo:['finder','research','experience'] },
@@ -2437,7 +2436,7 @@ const NetworkMode = {
     }
     document.removeEventListener('keydown', this._onKey);
     window.removeEventListener('resize', this._onResize);
-    document.body.style.cursor = 'none';
+    document.body.style.cursor = '';
   },
 
   initScene() {
@@ -2828,7 +2827,8 @@ const NetworkMode = {
       this.hoveredNode = null;
     }
     if (this.hoveredNode !== prevHovered) {
-      document.body.style.cursor = this.hoveredNode ? 'pointer' : 'none';
+      const canvas = document.getElementById('network-canvas');
+      if (canvas) canvas.classList.toggle('hovering-node', !!this.hoveredNode);
       document.getElementById('net-node-label').textContent = this.hoveredNode ? this.hoveredNode.def.label : '';
       if (prevHovered && !this.gsapFlying) {
         gsap.to(prevHovered.mesh.scale, { x: prevHovered.originalScale, y: prevHovered.originalScale, z: prevHovered.originalScale, duration: 0.2 });
@@ -2928,7 +2928,7 @@ const NetworkMode = {
         </div>`,
 
       projects: () => `
-        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:4px">Case Files</div>
+        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:4px">Projects</div>
         <div style="font-size:0.82rem;color:var(--os-text-3);margin-bottom:20px;font-family:var(--font-mono)">6 active projects — click a project node to dive in</div>
         ${[{n:'PhishNet',c:'01',t:'AI phishing detection & safe email rewriting',color:'var(--os-accent-2)'},{n:'AegisScan',c:'02',t:'Container vulnerability scanner & debloating',color:'var(--os-accent)'},{n:'Cloud-IR-Lab',c:'03',t:'Automated AWS incident response framework',color:'var(--os-green)'},{n:'Log-Aggregator',c:'04',t:'Distributed log pipeline with rate limiting',color:'var(--os-amber)'}].map(p => `
           <div style="display:flex;gap:12px;padding:12px;background:var(--os-surface-2);border-radius:10px;margin-bottom:8px;border-left:3px solid ${p.color}">
@@ -2937,7 +2937,7 @@ const NetworkMode = {
           </div>`).join('')}`,
 
       research: () => `
-        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:20px">Intel</div>
+        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:20px">Research</div>
         <div style="padding:16px;background:rgba(0,232,122,0.07);border:1px solid rgba(0,232,122,0.25);border-radius:10px;margin-bottom:16px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <div style="font-weight:700;color:var(--os-text-1)">Container &amp; Cloud Security Research</div>
@@ -2957,7 +2957,7 @@ const NetworkMode = {
         </div>`,
 
       experience: () => `
-        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:20px">Field Record</div>
+        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:20px">Experience</div>
         ${[{period:'May 2025 – Jan 2026',role:'Software Engineering Intern',org:'TCN',bullets:['Built TCN Investments platform in Next.js 14 with TypeScript — deployed to production','Implemented animated UI, SEO optimisation, zero-config CI/CD pipeline via Vercel','Full-stack feature delivery across React/Node stack']},{period:'May 2024 – Aug 2024',role:'Software Engineering Intern',org:'IncuseHR',bullets:['Implemented security controls and hardening across production CI/CD pipelines','OWASP Top 10 code reviews; integrated Semgrep and OWASP ZAP into automated workflows','Reduced MTTD for SAST findings by 60% through pipeline automation']},{period:'2024 – Present',role:'Research Assistant · Container & Cloud Security',org:'UTA Security Lab',bullets:['Researching container image attack surfaces and runtime threat detection','Building automated tooling for vulnerability scanning and image debloating','Targeting SCRF 2025 publication']},{period:'2022 – May 2026',role:'B.S. Computer Science & Engineering',org:'University of Texas at Arlington',bullets:['Specialisation in cybersecurity engineering','Relevant: Network Security, Cloud Computing, Software Engineering','GPA track — May 2026 graduation']}].map(e => `
           <div style="padding:14px;background:var(--os-surface-2);border-radius:10px;margin-bottom:10px;border-left:3px solid var(--os-amber)">
             <div style="font-size:0.68rem;color:var(--os-amber);font-family:var(--font-mono);margin-bottom:4px">${e.period}</div>
@@ -2967,7 +2967,7 @@ const NetworkMode = {
           </div>`).join('')}`,
 
       skills: () => `
-        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:16px">Capabilities</div>
+        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:16px">Skills</div>
         ${[{label:'Languages',tags:['Python','Go','JavaScript','Bash','SQL','C','HTML/CSS']},{label:'Security Tools',tags:['Burp Suite','Nmap','Wireshark','Metasploit','Trivy','Grype','Snyk','Semgrep','OWASP ZAP','Ghidra']},{label:'Cloud & Containers',tags:['Docker','Kubernetes','AWS EC2','AWS Lambda','GuardDuty','CloudWatch','IAM','Terraform','S3']},{label:'CTF Domains',tags:['Web Exploitation','Pwn / Binary','Cryptography','Forensics','Reverse Engineering']}].map(s => `
           <div style="margin-bottom:14px">
             <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--os-text-3);margin-bottom:6px;font-family:var(--font-mono)">${s.label}</div>
@@ -3107,7 +3107,6 @@ const NetworkMode = {
   closePanel() { this.pullBack(); }
 };
 
-// ─── 9. NOTIFICATIONS ───────────────────────────────────────────
 const Notify = {
   show(opts) {
     const container = document.getElementById('notifications');
@@ -3134,7 +3133,6 @@ const Notify = {
   }
 };
 
-// ─── 10. CONTEXT MENU ───────────────────────────────────────────
 const ContextMenu = {
   show(x, y, items) {
     const menu = document.getElementById('context-menu');
@@ -3177,16 +3175,15 @@ document.getElementById('desktop').addEventListener('contextmenu', (e) => {
 });
 document.addEventListener('click', (e) => { if (!e.target.closest('#context-menu')) ContextMenu.hide(); });
 
-// ─── COMMAND PALETTE ────────────────────────────────────────────
 const CommandPalette = {
   open: false, selectedIdx: 0, items: [],
   allItems: [
-    { type: 'App', name: 'Finder',       action: () => Desktop.openApp('finder') },
+    { type: 'App', name: 'About Me',     action: () => Desktop.openApp('finder') },
     { type: 'App', name: 'Terminal',     action: () => Desktop.openApp('terminal') },
-    { type: 'App', name: 'Case Files',   action: () => Desktop.openApp('projects') },
-    { type: 'App', name: 'Intel',        action: () => Desktop.openApp('research') },
-    { type: 'App', name: 'Field Record', action: () => Desktop.openApp('experience') },
-    { type: 'App', name: 'Capabilities', action: () => Desktop.openApp('skills') },
+    { type: 'App', name: 'Projects',    action: () => Desktop.openApp('projects') },
+    { type: 'App', name: 'Research',    action: () => Desktop.openApp('research') },
+    { type: 'App', name: 'Experience',  action: () => Desktop.openApp('experience') },
+    { type: 'App', name: 'Skills',      action: () => Desktop.openApp('skills') },
     { type: 'App', name: 'Contact',      action: () => Desktop.openApp('contact') },
     { type: 'Project', name: 'PhishNet',       action: () => Desktop.openApp('projects') },
     { type: 'Project', name: 'AegisScan',      action: () => Desktop.openApp('projects') },
@@ -3261,14 +3258,13 @@ const CommandPalette = {
   }
 };
 
-// ─── KEYBOARD SHORTCUTS ─────────────────────────────────────────
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') { ContextMenu.hide(); if (CommandPalette.open) CommandPalette.close(); }
   const key = e.key.toLowerCase();
   const mod = e.ctrlKey || e.metaKey;
-  if (mod && key === '1') { e.preventDefault(); Desktop.openApp('finder'); }
-  if (mod && key === '2') { e.preventDefault(); Desktop.openApp('terminal'); }
-  if (mod && key === '3') { e.preventDefault(); Desktop.openApp('projects'); }
+  if (mod && key === '1') { e.preventDefault(); openOrFocus('finder'); }
+  if (mod && key === '2') { e.preventDefault(); openOrFocus('terminal'); }
+  if (mod && key === '3') { e.preventDefault(); openOrFocus('projects'); }
   if (mod && key === 'w') { e.preventDefault(); if (OS.activeWindow) WM.close(OS.activeWindow); }
   if (mod && key === 'm') { e.preventDefault(); if (OS.activeWindow) WM.minimize(OS.activeWindow); }
   if (mod && key === 'k') { e.preventDefault(); CommandPalette.toggle(); }
@@ -3276,50 +3272,11 @@ document.addEventListener('keydown', (e) => {
   if (!mod && e.key === 'n' && !e.target.closest('input, textarea')) { if (NetworkMode.active) NetworkMode.exit(); else NetworkMode.enter(); }
   if (e.code === 'Backquote') {
     e.preventDefault();
-    if (OS.windows['terminal']) {
-      if (OS.windows['terminal'].minimized) WM.restore('terminal');
-      else WM.focus('terminal');
-    } else {
-      Desktop.openApp('terminal');
-    }
+    openOrFocus('terminal');
   }
 });
 
-// ─── 11. CURSOR ─────────────────────────────────────────────────
-const Cursor = {
-  el: null, x: 0, y: 0, tx: 0, ty: 0,
-  init() {
-    this.el = document.getElementById('cursor');
-    this.loop();
-  },
-  update(e) {
-    this.tx = e.clientX;
-    this.ty = e.clientY;
-    this.setState(e);
-  },
-  loop() {
-    this.x += (this.tx - this.x) * 0.18;
-    this.y += (this.ty - this.y) * 0.18;
-    if (this.el) {
-      this.el.style.left = this.x + 'px';
-      this.el.style.top  = this.y + 'px';
-    }
-    requestAnimationFrame(() => this.loop());
-  },
-  setState(e) {
-    if (!this.el) return;
-    const t = e.target;
-    if (t.closest('a[href], button, .dock-item, .wc-close, .wc-minimize, .wc-maximize, .desktop-icon')) {
-      this.el.className = 'hover';
-    } else if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.closest('#term-input')) {
-      this.el.className = 'text';
-    } else {
-      this.el.className = '';
-    }
-  }
-};
 
-// ─── 12. GRAIN ──────────────────────────────────────────────────
 const Grain = {
   init() {
     const canvas = document.createElement('canvas');
@@ -3340,14 +3297,11 @@ const Grain = {
 };
 
 
-// ─── 13. INIT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   Grain.init();
-  Wallpaper.init();
   MenuBar.init();
   Desktop.init();
   Dock.init();
-  Cursor.init();
   CommandPalette.init();
   Boot.init();
 });
